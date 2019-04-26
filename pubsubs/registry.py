@@ -39,6 +39,7 @@ class Registry:
         return self
 
     def _process_config(self, config):
+        """ Load yaml as string into dict."""
         config = yaml.safe_load(config)
         for name, kwargs in config.items():
             kwargs = kwargs.copy()

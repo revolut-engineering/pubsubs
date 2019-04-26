@@ -45,7 +45,11 @@ class MessageQueue(metaclass=InterfaceMeta):
     def subscribe(self, *topics):
         self._connect()
         topics = list(topics)
-        return self._subscriber(self._config, topics, **self._sub_config)
+
+        # Create a new subscriber from message queue implementation
+        return self._subscriber(
+            self._config, topics, self.serializer, **self._sub_config
+        )
 
     def _assign_subscriber(self):
         return Subscriber.for_backend(self.backend)
@@ -68,8 +72,16 @@ class Subscriber(metaclass=InterfaceMeta):
 
     BACKENDS = None
 
-    def __init__(self, serializer, **kwargs):
+    def __init__(self, config, topics, serializer, **kwargs):
+        self.config = config
+        self.topics = topics
         self.serializer = serializer
+        self.subscriber_config = kwargs
+        self._connect()
+
+    @abstractmethod
+    def _connect(self):
+        raise NotImplementedError
 
     @classmethod
     def __register_implementation__(cls):

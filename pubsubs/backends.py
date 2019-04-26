@@ -1,1 +1,2 @@
-from .kafka import KafkaClient
+# from .avro import AvroClient
+from .kafka import KafkaClient, KafkaSubscriber
