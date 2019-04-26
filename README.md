@@ -16,16 +16,18 @@ pip install pubsubs
 ## Usage
 
 ```
-import pubsubs
+from pubsubs.pubsubs import Registry
 
-pubsub = pubsubs.new('kafka')
-pubsub = pubsubs.import_from_config(config)
-pubsub = pubsubs.import_from_yaml('name: kafka')
+CONFIG = """\
+kafka:
+    backend: kafka
+    message.timeout.ms: 1500
+    bootstrap.servers:
+        - localhost:9092
+"""
+register = Registry()
+reg = register.register_from_config(CONFIG)
 
-subscriber = pubsub.subscribe('topicA', 'topicB') -> Variadic Args
-
-pubsub.publish(topic='topic', message='message')
-
-message = next(subscriber)
-assert message == 'message'
+ps = reg["kafka"]
+ps.publish(topic="NeW-Topic", message="hey!")
 ```
