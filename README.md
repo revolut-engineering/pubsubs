@@ -16,7 +16,7 @@ pip install pubsubs
 ## Usage
 
 ```
-from pubsubs.pubsubs import Registry
+from pubsubs.registry import Registry
 
 CONFIG = """\
 kafka:
@@ -30,4 +30,6 @@ reg = register.register_from_config(CONFIG)
 
 ps = reg["kafka"]
 ps.publish(topic="NeW-Topic", message="hey!")
+
+sub = ps.subscriber('topic1', 'topic2')
 ```

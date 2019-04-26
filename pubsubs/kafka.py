@@ -1,14 +1,17 @@
-from pubsubs.pubsubs import PubSub
+from interface_meta import override
+
+from pubsubs.mq import MessageQueue
 
 
 class KafkaSubscriber:
     pass
 
 
-class KafkaClient(PubSub):
+class KafkaClient(MessageQueue):
 
     BACKENDS = ["kafka"]
 
+    @override
     def _connect(self):
         from confluent_kafka import Producer
 
@@ -18,9 +21,11 @@ class KafkaClient(PubSub):
         }
         self._producer = Producer(_SETTINGS)
 
-    def _new_subscriber(self):
+    @override
+    def _new_subscriber(self, *topics):
         return KafkaSubscriber()
 
+    @override
     def _publish(self, topic, message):
         def delivery_report(err, msg):
             if err is not None:
