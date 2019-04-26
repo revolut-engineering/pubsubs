@@ -15,8 +15,9 @@ pip install pubsubs
 
 ## Usage
 
-```
+```python
 from pubsubs.registry import Registry
+
 
 CONFIG = """\
 kafka:
@@ -25,11 +26,13 @@ kafka:
     bootstrap.servers:
         - localhost:9092
 """
-register = Registry()
-reg = register.register_from_config(CONFIG)
 
-ps = reg["kafka"]
-ps.publish(topic="NeW-Topic", message="hey!")
+registry = Registry()
+registry.register_from_config(CONFIG)
 
-sub = ps.subscriber('topic1', 'topic2')
+message_queue = registry["kafka"]
+
+message_queue.publish(topic="NeW-Topic", message="hey!")
+
+subscriber = message_queue.new_subscriber('topic1', 'topic2')
 ```
