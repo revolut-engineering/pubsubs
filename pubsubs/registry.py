@@ -1,13 +1,21 @@
+""" Registry controlling access to pubsubs."""
 import yaml
 
-from pubsubs.mq import MessageQueue
+from pubsubs.base import MessageQueue
 
 
 class Registry:
     def __init__(self):
         self._registry = {}
 
+    def new(self, name, backend, **kwargs):
+        """ Register concrete instance."""
+        return self.register(
+            MessageQueue.for_backend(backend)(name, registry=self, **kwargs), name=name
+        )
+
     def register(self, message_queue, name):
+        """ Register concrete message queue instance under a name."""
         name = message_queue.name if not name else name
 
         if name in self._registry:
@@ -22,13 +30,13 @@ class Registry:
     def __contains__(self, name):
         return name in self._registry
 
-    def new(self, name, backend, **kwargs):
-        return self.register(
-            MessageQueue.for_backend(backend)(name, registry=self, **kwargs), name=name
-        )
-
     def register_from_config(self, config):
-        """ Expects yaml in the form of text."""
+        """ Expects yaml in the form of text.
+        Format compatible with 'omniduct'
+
+        See:
+        https://github.com/airbnb/omniduct/blob/master/example_wrapper/example_wrapper/services.yml
+        """
         config = self._process_config(config)
 
         for mq_config in config:
@@ -41,7 +49,9 @@ class Registry:
     def _process_config(self, config):
         """ Load yaml as string into dict."""
         config = yaml.safe_load(config)
-        for name, kwargs in config.items():
+
+        pubsub_config = config.pop("pubsubs")
+        for name, kwargs in pubsub_config.items():
             kwargs = kwargs.copy()
             kwargs["name"] = name
             yield kwargs

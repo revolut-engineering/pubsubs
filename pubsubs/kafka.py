@@ -1,9 +1,13 @@
+""" Concrete kafka implementation."""
+import logging
+
 from interface_meta import override
 
-from pubsubs.mq import MessageQueue, Subscriber
+from pubsubs.base import MessageQueue, Subscriber
 
 
 class KafkaClient(MessageQueue):
+    """ Concrete client implementation of Kafka."""
 
     BACKENDS = ["kafka"]
 
@@ -15,8 +19,10 @@ class KafkaClient(MessageQueue):
         self._producer = Producer(self._config)
 
     def _prepare(self):
+        """ Prepare kafka configuration."""
         # Configuration for subscriber
         poll = self.config.pop("poll")
+        self._poll = poll
         self._sub_config = {"poll": poll}
 
         # Configuration for publisher
@@ -26,13 +32,19 @@ class KafkaClient(MessageQueue):
 
     @override
     def _publish(self, topic, message):
+        """ Kafka implementation of publish."""
+
         def delivery_report(err, msg):
             if err is not None:
-                print("Message failed: {}".format(err))
+                logging.exception("Message failed: {}".format(err))
             else:
-                print("Message delivered")
+                logging.debug(
+                    "Message delivered, topic: {}, partition: {}, offset".format(
+                        msg.topic(), msg.partition(), msg.offset()
+                    )
+                )
 
-        self._producer.poll(0)
+        self._producer.poll(self._poll)
         self._producer.produce(topic, message, callback=delivery_report)
         self._producer.flush()
 
@@ -41,9 +53,11 @@ class KafkaClient(MessageQueue):
 
 
 class KafkaSubscriber(Subscriber):
+    """ Concrete Kafka subscriber."""
 
     BACKENDS = ["kafka"]
 
+    @override
     def _connect(self):
         from confluent_kafka import Consumer
 
@@ -51,12 +65,13 @@ class KafkaSubscriber(Subscriber):
         self._consumer = Consumer(self.config)
         self._consumer.subscribe(self.topics)
 
+    @override
     def __next__(self):
         while True:
             msg = self._consumer.poll(self._poll)
             if msg is None:
                 continue
             if msg.error():
-                print(f"Consumer error {msg.error()}")
+                logging.error(f"Consumer error {msg.error()}")
             if msg:
                 return msg

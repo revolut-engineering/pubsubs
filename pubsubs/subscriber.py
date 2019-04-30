@@ -1,3 +1,5 @@
+""" Abstract base class for the subscriber."""
+import logging
 import functools
 from abc import abstractmethod
 
@@ -5,6 +7,7 @@ from interface_meta import InterfaceMeta
 
 
 class Subscriber(metaclass=InterfaceMeta):
+    """ Abstract Subscriber."""
 
     BACKENDS = None
 
@@ -15,13 +18,30 @@ class Subscriber(metaclass=InterfaceMeta):
         self.serializer = serializer
         self.subscriber_config = subscriber_config
 
+    def listen(self):
+        """ Blocks until a message is received."""
+        logging.info("Subscriber listening..")
+        message = next(self)
+        return self.serializer(message)
+
     def connect(self):
         self._connect()
         return self
 
     @abstractmethod
+    def __next__(self):
+        """ Return next message from the queue."""
+        raise NotImplementedError
+
+    @abstractmethod
     def _connect(self):
         raise NotImplementedError
+
+    @classmethod
+    def for_backend(cls, backend):
+        if backend not in cls._backends:
+            raise KeyError(f"Missing '{backend}' implementation")
+        return functools.partial(cls._backends[backend], backend=backend)
 
     @classmethod
     def __register_implementation__(cls):
@@ -37,18 +57,3 @@ class Subscriber(metaclass=InterfaceMeta):
                     raise NameError("Key already registered")
                 else:
                     cls._backends[key] = cls
-
-    @classmethod
-    def for_backend(cls, backend):
-        if backend not in cls._backends:
-            raise KeyError(f"Missing '{backend}' implementation")
-        return functools.partial(cls._backends[backend], backend=backend)
-
-    def listen(self):
-        """ Blocks until a message is received."""
-        message = next(self)
-        return self.serializer(message)
-
-    @abstractmethod
-    def __next__(self):
-        raise NotImplementedError

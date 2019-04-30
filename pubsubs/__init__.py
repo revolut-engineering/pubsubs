@@ -1,3 +1,3 @@
-from pubsubs.mq import MessageQueue
+from pubsubs.base import MessageQueue
 
 from . import backends
