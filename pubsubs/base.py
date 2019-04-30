@@ -3,7 +3,7 @@ import logging
 import functools
 from abc import abstractmethod
 
-from interface_meta import quick_docs
+from interface_meta import quirk_docs
 from interface_meta import InterfaceMeta
 
 from pubsubs.subscriber import Subscriber
@@ -33,10 +33,10 @@ class MessageQueue(metaclass=InterfaceMeta):
 
         # Initialise new subscriber from the name of concrete class
         return Subscriber.for_backend(self.backend)(
-            self.subscriber_config, topics, self._serializer, **self.subscriber_config
+            self.subscriber_config, topics, self._serializer
         ).connect()
 
-    @quick_docs("_publish")
+    @quirk_docs("_publish")
     def publish(self, topic, message):
         """ Publish `message` to the `topic`."""
         self._connect()
@@ -73,7 +73,7 @@ class MessageQueue(metaclass=InterfaceMeta):
     def __register_implementation__(cls):
         """ Register concrete child classes inheriting this base class.
 
-        Method called by metaclass.
+        Method called by metaclass 'InterfaceMeta'.
         """
         if not hasattr(cls, "_backends"):
             cls._backends = {}

@@ -13,12 +13,11 @@ class Subscriber(metaclass=InterfaceMeta):
     INTERFACE_RAISE_ON_VIOLATION = True
     BACKENDS = None
 
-    def __init__(self, config, topics, serializer, **subscriber_config):
+    def __init__(self, config, topics, serializer):
         self.config = config
         self.topics = topics
         #: Serializes the message received while listening
         self.serializer = serializer
-        self.subscriber_config = subscriber_config
 
     def listen(self):
         """ Blocks until a message is received."""
@@ -41,12 +40,17 @@ class Subscriber(metaclass=InterfaceMeta):
 
     @classmethod
     def for_backend(cls, backend):
+        """ Retrieve concrete subscriber by name `backend`."""
         if backend not in cls._backends:
             raise KeyError(f"Missing '{backend}' implementation")
-        return functools.partial(cls._backends[backend], backend=backend)
+        return cls._backends[backend]
 
     @classmethod
     def __register_implementation__(cls):
+        """ Register concrete child classes inheriting this base class.
+
+        Method called by metaclass 'InterfaceMeta'.
+        """
         if not hasattr(cls, "_backends"):
             cls._backends = {}
 
