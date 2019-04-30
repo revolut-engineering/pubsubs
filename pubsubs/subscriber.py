@@ -9,6 +9,8 @@ from interface_meta import InterfaceMeta
 class Subscriber(metaclass=InterfaceMeta):
     """ Abstract Subscriber."""
 
+    INTERFACE_EXPLICIT_OVERRIDES = True
+    INTERFACE_RAISE_ON_VIOLATION = True
     BACKENDS = None
 
     def __init__(self, config, topics, serializer, **subscriber_config):

@@ -28,8 +28,10 @@ from pubsubs.registry import Registry
 
 config = {
     "listeners": ['localhost:9092'],
-    "poll": 1.0,
-    "message.timeout.ms": 1500,
+    "publisher": {
+        "poll": 1.0,
+        "message.timeout.ms": 1500,
+    }
 }
 
 registry = Registry()
@@ -48,9 +50,13 @@ pubsubs:
     kafka:
         backend: kafka
         listeners: ['localhost:9092']
-        poll: 0.1
-        group.id: 'myGroup'
-        auto.offset.reset: 'earliest'
+        publisher:
+            poll: 1.0
+            message.timeout.ms: 1500
+        subscriber:
+            poll: 0.1
+            group.id: 'myGroup'
+            auto.offset.reset: 'earliest'
 ```
 
 New Subscriber instance
@@ -82,3 +88,5 @@ The subsection `pubsubs` in the yaml allows the config to be used along side
 | ---- | ----------- | ------- |
 | `backend` | Name of pub sub implementation | `backend: kafka` |
 | `listeners` | List of serving addresses | `listeners: ['localhost:9092']` |
+| `publisher` | Settings for the publisher | `publisher: {timeout: 1.0}` |
+| `subscriber` | Settings for a subscriber | `subscriber: {timeout: 1.0}` |

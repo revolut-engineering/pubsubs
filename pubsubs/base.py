@@ -1,7 +1,9 @@
 """ Abstract base class, controls the interface for pub/sub implementations."""
+import logging
 import functools
 from abc import abstractmethod
 
+from interface_meta import quick_docs
 from interface_meta import InterfaceMeta
 
 from pubsubs.subscriber import Subscriber
@@ -10,6 +12,8 @@ from pubsubs.subscriber import Subscriber
 class MessageQueue(metaclass=InterfaceMeta):
     """ Abstract Base Class."""
 
+    INTERFACE_EXPLICIT_OVERRIDES = True
+    INTERFACE_RAISE_ON_VIOLATION = True
     BACKENDS = None
 
     def __init__(self, name, registry, backend, listeners, **config):
@@ -32,10 +36,12 @@ class MessageQueue(metaclass=InterfaceMeta):
             self.subscriber_config, topics, self._serializer, **self.subscriber_config
         ).connect()
 
+    @quick_docs("_publish")
     def publish(self, topic, message):
         """ Publish `message` to the `topic`."""
         self._connect()
         self._publish(topic, message)
+        logging.info(f"'{message}' published to '{topic}'")
         return "Delivered"
 
     @property
@@ -65,7 +71,10 @@ class MessageQueue(metaclass=InterfaceMeta):
 
     @classmethod
     def __register_implementation__(cls):
-        """ Register concrete child classes inheriting this base class."""
+        """ Register concrete child classes inheriting this base class.
+
+        Method called by metaclass.
+        """
         if not hasattr(cls, "_backends"):
             cls._backends = {}
 

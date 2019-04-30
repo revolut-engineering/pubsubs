@@ -20,15 +20,15 @@ class KafkaClient(MessageQueue):
 
     def _prepare(self):
         """ Prepare kafka configuration."""
-        # Configuration for subscriber
-        poll = self.config.pop("poll")
-        self._poll = poll
-        self._subscriber_config = {"poll": poll}
-
         # Configuration for publisher
+        self._config = self.config.pop("publisher")
+        self._poll = self._config.pop("poll")
+
         servers = ",".join(self.listeners)
-        self._config = {"bootstrap.servers": servers}
-        self._config.update(self.config)
+        self._config.update({"bootstrap.servers": servers})
+
+        # Configuration for subscriber
+        self._subscriber_config = self.config.pop("subscriber")
 
     @override
     def _publish(self, topic, message):
@@ -62,7 +62,7 @@ class KafkaSubscriber(Subscriber):
     def _connect(self):
         from confluent_kafka import Consumer
 
-        self._poll = self.subscriber_config.pop("poll")
+        self._poll = self.config.pop("poll")
         self._consumer = Consumer(self.config)
         self._consumer.subscribe(self.topics)
 
