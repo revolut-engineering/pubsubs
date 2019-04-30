@@ -6,13 +6,15 @@
     Uniform interfaces for Publishing and Subscribing
 </h4>
 
+---
+
 This library allows you to decouple the publish/subscribe implementation
 from your service.
 
 ## Installing
 
 ```
-pip install pubsubs
+pip install pubsubs[<implementation-name>]
 ```
 
 ## Usage
