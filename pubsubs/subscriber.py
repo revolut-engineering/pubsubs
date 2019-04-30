@@ -1,6 +1,5 @@
 """ Abstract base class for the subscriber."""
 import logging
-import functools
 from abc import abstractmethod
 
 from interface_meta import InterfaceMeta
