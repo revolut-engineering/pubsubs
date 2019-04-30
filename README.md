@@ -3,9 +3,11 @@
 </h1>
 
 <h4 align='center'>
-    Uniform pubsub interfaces
+    Uniform interfaces for Publishing and Subscribing
 </h4>
 
+This library allows you to decouple the publish/subscribe implementation
+from your service.
 
 ## Installing
 
@@ -17,7 +19,7 @@ pip install pubsubs
 
 ### Publisher
 
-Configuration
+Configuring a Kafka publisher
 
 ```yaml
 kafka:
@@ -28,7 +30,7 @@ kafka:
     message.timeout.ms: 1500
 ```
 
-New publisher
+New Kafka publisher instance
 
 ```python
 from pubsubs.registry import Registry
@@ -38,14 +40,13 @@ CONFIG = <see-above>
 registry = Registry()
 registry.register_from_config(CONFIG)
 
-message_queue = registry["kafka"]
-
-message_queue.publish(topic="MyTopic", message="hey!")
+kafka = registry["kafka"]
+kafka.publish(topic="MyTopic", message="hey!")
 ```
 
 ### Subscriber
 
-Configuration
+Configuring a Kafka subscriber
 
 ```yaml
 kafka:
@@ -56,7 +57,7 @@ kafka:
     auto.offset.reset: 'earliest'
 ```
 
-New Subscriber
+New Subscriber instance
 
 ```python
 from pubsubs.registry import Registry
@@ -66,10 +67,10 @@ CONFIG = <see-above>
 registry = Registry()
 registry.register_from_config(CONFIG)
 
-message_queue = registry["kafka"]
-subscriber = message_queue.subscribe("MyTopic", "news-topic")
+kafka = registry["kafka"]
+subscriber = kafka.subscribe("MyTopic", "news-topic")
 
 while True:
-    next_message = subscriber.listen()
-    print(next_message)
+    message = subscriber.listen()
+    print(message)
 ```
