@@ -23,7 +23,7 @@ class KafkaClient(MessageQueue):
         # Configuration for subscriber
         poll = self.config.pop("poll")
         self._poll = poll
-        self._sub_config = {"poll": poll}
+        self._subscriber_config = {"poll": poll}
 
         # Configuration for publisher
         servers = ",".join(self.listeners)
@@ -48,7 +48,8 @@ class KafkaClient(MessageQueue):
         self._producer.produce(topic, message, callback=delivery_report)
         self._producer.flush()
 
-    def serializer(self, message):
+    @override
+    def _serializer(self, message):
         return message.value().decode("utf-8")
 
 

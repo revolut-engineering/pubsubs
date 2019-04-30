@@ -29,7 +29,7 @@ class MessageQueue(metaclass=InterfaceMeta):
 
         # Initialise new subscriber from the name of concrete class
         return Subscriber.for_backend(self.backend)(
-            self._config, topics, self.serializer, **self._sub_config
+            self.subscriber_config, topics, self._serializer, **self.subscriber_config
         ).connect()
 
     def publish(self, topic, message):
@@ -37,6 +37,16 @@ class MessageQueue(metaclass=InterfaceMeta):
         self._connect()
         self._publish(topic, message)
         return "Delivered"
+
+    @property
+    def subscriber_config(self):
+        """ Configuration of associated subscriber."""
+        return self._subscriber_config
+
+    @abstractmethod
+    def _serializer(self, message):
+        """ Format message received by the implementation."""
+        raise NotImplementedError
 
     @abstractmethod
     def _publish(self, topic, message):
