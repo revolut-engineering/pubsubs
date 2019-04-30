@@ -47,7 +47,7 @@ Configuring a Kafka subscriber and using a yaml.
 
 ```yaml
 pubsubs:
-    kafka:
+    myKafka:
         backend: kafka
         listeners: ['localhost:9092']
         publisher:
@@ -71,7 +71,7 @@ registry = Registry()
 # This is alternative to using 'Registry.new'
 registry.register_from_config(CONFIG)
 
-kafka = registry["kafka"]
+kafka = registry["myKafka"]
 subscriber = kafka.subscribe("MyTopic", "news-topic")
 
 while True:
