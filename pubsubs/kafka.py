@@ -10,6 +10,7 @@ class KafkaClient(MessageQueue):
     """ Concrete client implementation of Kafka."""
 
     BACKENDS = ["kafka"]
+    backend = "kafka"
 
     @override
     def _connect(self):
@@ -20,15 +21,17 @@ class KafkaClient(MessageQueue):
 
     def _prepare(self):
         """ Prepare kafka configuration."""
+
         # Configuration for publisher
         self._config = self.config.pop("publisher")
         self._poll = self._config.pop("poll")
 
-        servers = ",".join(self.listeners)
-        self._config.update({"bootstrap.servers": servers})
+        servers = {"bootstrap.servers": ",".join(self.listeners)}
+        self._config.update(servers)
 
         # Configuration for subscriber
-        self._subscriber_config = self.config.pop("subscriber")
+        self._subscriber_config = self.config.pop("subscriber", {})
+        self._subscriber_config.update(servers)
 
     @override
     def _publish(self, topic, message):
@@ -57,6 +60,7 @@ class KafkaSubscriber(Subscriber):
     """ Concrete Kafka subscriber."""
 
     BACKENDS = ["kafka"]
+    backend = "kafka"
 
     @override
     def _connect(self):
@@ -74,5 +78,6 @@ class KafkaSubscriber(Subscriber):
                 continue
             if msg.error():
                 logging.error(f"Consumer error {msg.error()}")
+            logging.info(msg)
             if msg:
                 return msg

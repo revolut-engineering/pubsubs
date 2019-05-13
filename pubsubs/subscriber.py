@@ -4,6 +4,9 @@ from abc import abstractmethod
 
 from interface_meta import InterfaceMeta
 
+from pubsubs.exceptions import PubSubKeyError
+from pubsubs.exceptions import PubSubNotFound
+
 
 class Subscriber(metaclass=InterfaceMeta):
     """ Abstract Subscriber."""
@@ -20,7 +23,7 @@ class Subscriber(metaclass=InterfaceMeta):
 
     def listen(self):
         """ Blocks until a message is received."""
-        logging.info("Subscriber listening..")
+        logging.info(f"Subscriber listening to topics: {self.topics}")
         message = next(self)
         return self.serializer(message)
 
@@ -41,7 +44,9 @@ class Subscriber(metaclass=InterfaceMeta):
     def for_backend(cls, backend):
         """ Retrieve concrete subscriber by name `backend`."""
         if backend not in cls._backends:
-            raise KeyError(f"Missing '{backend}' implementation")
+            raise PubSubNotFound(
+                f"Missing subscriber implementation for '{backend}' backend."
+            )
         return cls._backends[backend]
 
     @classmethod
@@ -59,6 +64,6 @@ class Subscriber(metaclass=InterfaceMeta):
         if registry_keys:
             for key in registry_keys:
                 if key in cls._backends and cls.__name__ != cls._backends[key].__name__:
-                    raise NameError("Key already registered")
+                    raise PubSubKeyError("Implementation already registered")
                 else:
                     cls._backends[key] = cls

@@ -7,6 +7,8 @@ from interface_meta import quirk_docs
 from interface_meta import InterfaceMeta
 
 from pubsubs.subscriber import Subscriber
+from pubsubs.exceptions import PubSubKeyError
+from pubsubs.exceptions import PubSubNotFound
 
 
 class MessageQueue(metaclass=InterfaceMeta):
@@ -16,11 +18,9 @@ class MessageQueue(metaclass=InterfaceMeta):
     INTERFACE_RAISE_ON_VIOLATION = True
     BACKENDS = None
 
-    def __init__(self, name, registry, backend, listeners, **config):
+    def __init__(self, name, registry, listeners, **config):
         self.name = name
         self.registry = registry
-        #: The name of the implementation
-        self.backend = backend
         self.listeners = listeners
         self.config = config
 
@@ -28,7 +28,6 @@ class MessageQueue(metaclass=InterfaceMeta):
         """ Return a subscriber instance associated to the concrete
         implementation.
         """
-        self._connect()
         topics = list(topics)
 
         # Initialise new subscriber from the name of concrete class
@@ -36,13 +35,16 @@ class MessageQueue(metaclass=InterfaceMeta):
             self.subscriber_config, topics, self._serializer
         ).connect()
 
+    def connect(self):
+        """ Connect to client implementation."""
+        self._connect()
+        return self
+
     @quirk_docs("_publish")
     def publish(self, topic, message):
         """ Publish `message` to the `topic`."""
-        self._connect()
         self._publish(topic, message)
         logging.info(f"'{message}' published to '{topic}'")
-        return "Delivered"
 
     @property
     def subscriber_config(self):
@@ -66,8 +68,10 @@ class MessageQueue(metaclass=InterfaceMeta):
     def for_backend(cls, backend):
         """ Retrieve concrete implementation by name `backend`."""
         if backend not in cls._backends:
-            raise KeyError(f"Missing '{backend} implementation")
-        return functools.partial(cls._backends[backend], backend=backend)
+            raise PubSubNotFound(
+                f"Missing publisher implementation for '{backend}' backend."
+            )
+        return functools.partial(cls._backends[backend])
 
     @classmethod
     def __register_implementation__(cls):
@@ -84,6 +88,6 @@ class MessageQueue(metaclass=InterfaceMeta):
         if registry_keys:
             for key in registry_keys:
                 if key in cls._backends and cls.__name__ != cls._backends[key].__name__:
-                    raise NameError("Key already registered")
+                    raise PubSubKeyError("Implementation already registered")
                 else:
                     cls._backends[key] = cls

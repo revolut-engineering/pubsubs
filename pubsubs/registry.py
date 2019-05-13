@@ -2,16 +2,18 @@
 import yaml
 
 from pubsubs.base import MessageQueue
+from pubsubs.exceptions import PubSubKeyError
 
 
 class Registry:
     def __init__(self):
         self._registry = {}
 
-    def new(self, name, backend, **kwargs):
+    def new(self, *, name, backend, **kwargs):
         """ Register concrete instance."""
         return self.register(
-            MessageQueue.for_backend(backend)(name, registry=self, **kwargs), name=name
+            MessageQueue.for_backend(backend)(name, registry=self, **kwargs).connect(),
+            name=name,
         )
 
     def register(self, message_queue, name):
@@ -19,7 +21,7 @@ class Registry:
         name = message_queue.name if not name else name
 
         if name in self._registry:
-            raise ValueError(f"PubSub {name} exists.")
+            raise PubSubKeyError(f"PubSub {name} exists.")
 
         self._registry[name] = message_queue
         return message_queue
@@ -42,7 +44,7 @@ class Registry:
         for mq_config in config:
             name = mq_config.pop("name")
             backend = mq_config.pop("backend")
-            self.new(name, backend, **mq_config)
+            self.new(name=name, backend=backend, **mq_config)
 
         return self
 

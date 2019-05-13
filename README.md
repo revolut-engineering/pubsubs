@@ -36,7 +36,7 @@ config = {
 
 registry = Registry()
 
-kafka = registry.new("kafka1", backend="kafka", **config)
+kafka = registry.new(name="kafka1", backend="kafka", **config)
 
 kafka.publish(topic="MyTopic", message="hey!")
 ```
