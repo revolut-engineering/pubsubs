@@ -10,14 +10,14 @@ class Registry:
         self._registry = {}
 
     def new(self, *, name, backend, **kwargs):
-        """ Register concrete instance."""
+        """ Register new instantiated concrete instance."""
         return self.register(
             MessageQueue.for_backend(backend)(name, registry=self, **kwargs).connect(),
             name=name,
         )
 
     def register(self, message_queue, name):
-        """ Register concrete message queue instance under a name."""
+        """ Assign concrete concrete instance to a name."""
         name = message_queue.name if not name else name
 
         if name in self._registry:
