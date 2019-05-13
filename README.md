@@ -26,26 +26,7 @@ New Kafka publisher instance
 ```python
 from pubsubs.registry import Registry
 
-config = {
-    "listeners": ['localhost:9092'],
-    "publisher": {
-        "poll": 1.0,
-        "message.timeout.ms": 1500,
-    }
-}
-
-registry = Registry()
-
-kafka = registry.new(name="kafka1", backend="kafka", **config)
-
-kafka.publish(topic="MyTopic", message="hey!")
-```
-
-### Subscriber
-
-Configuring a Kafka subscriber and using a yaml.
-
-```yaml
+CONFIG = """\
 pubsubs:
     myKafka:
         backend: kafka
@@ -53,27 +34,34 @@ pubsubs:
         publisher:
             poll: 1.0
             message.timeout.ms: 1500
-        subscriber:
-            poll: 0.1
-            group.id: 'myGroup'
-            auto.offset.reset: 'earliest'
+"""
+
+registry = Registry()
+registry.register_from_config(CONFIG)
+
+kafka = registry["myKafka"]
+kafka.publish(topic="mytopic", message="howl")
 ```
 
-New Subscriber instance
+### Subscriber
+
+Configuring a Kafka subscriber.
 
 ```python
 from pubsubs.registry import Registry
 
-CONFIG = <see-above>
-
+config = {
+    "listeners": ["localhost:9092"],
+    "subscriber": {
+        "poll": 0.1,
+        "group.id": "mygroup",
+        "auto.offset.reset": "earliest"
+    },
+}
 registry = Registry()
+kafka = registry.new(name="myKafka", backend="kafka", **config)
 
-# This is alternative to using 'Registry.new'
-registry.register_from_config(CONFIG)
-
-kafka = registry["myKafka"]
-subscriber = kafka.subscribe("MyTopic", "news-topic")
-
+subscriber = kafka.subscribe("mytopic")
 while True:
     message = subscriber.listen()
     print(message)
@@ -90,3 +78,36 @@ The subsection `pubsubs` in the yaml allows the config to be used along side
 | `listeners` | List of serving addresses | `listeners: ['localhost:9092']` |
 | `publisher` | Settings for the publisher | `publisher: {timeout: 1.0}` |
 | `subscriber` | Settings for a subscriber | `subscriber: {timeout: 1.0}` |
+
+#### Example config
+
+The following is an example of setting up a config for kafka.
+
+```yaml
+pubsubs:
+    kafka:
+        backend: kafka
+        listeners: ['localhost:9092']
+        publisher:
+            poll: 1.0
+            message.timeout.ms: 1500
+        subscriber:
+            poll: 0.1
+            group.id: 'myGroup'
+            auto.offset.reset: 'earliest'
+
+    kafkaPub:
+        backend: kafka
+        listeners: ['localhost:9092']
+        publisher:
+            poll: 1.0
+            message.timeout.ms: 1500
+
+    kafkaSub:
+        backend: kafka
+        listeners: ['localhost:9093']
+        subscriber:
+            poll: 0.1
+            group.id: 'myGroup'
+            auto.offset.reset: 'earliest'
+```

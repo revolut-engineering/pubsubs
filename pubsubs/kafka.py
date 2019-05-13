@@ -23,7 +23,7 @@ class KafkaClient(MessageQueue):
         """ Prepare kafka configuration."""
 
         # Configuration for publisher
-        self._config = self.config.pop("publisher")
+        self._config = self.config.pop("publisher", {"poll": None})
         self._poll = self._config.pop("poll")
 
         servers = {"bootstrap.servers": ",".join(self.listeners)}
