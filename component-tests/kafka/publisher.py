@@ -1,5 +1,10 @@
+""" Executed against a kafka instance in CI."""
+import time
+
 from pubsubs.registry import Registry
 
+# Two minutes from now
+TIMEOUT = time.time() + 60 * 2
 CONFIG = """\
 pubsubs:
     myKafka:
@@ -26,5 +31,7 @@ subscriber = kafka.subscribe("mytopic")
 message = None
 while not message:
     message = subscriber.listen()
+    if time.time() > TIMEOUT:
+        break
 
 assert message == "howl"
