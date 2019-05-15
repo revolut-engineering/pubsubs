@@ -19,9 +19,16 @@ jobs:
       - checkout
 
       - run:
-          name: Wait for kafka to start up
-          command: |
-            sleep 25
+          # circleci support page:
+          # https://support.circleci.com/hc/en-us/articles/360006773953-Race-Conditions-Wait-For-Database
+          name: Install dockerize
+          command: wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz && sudo tar -C /usr/local/bin -xzvf dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz && rm dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz
+          environment:
+            DOCKERIZE_VERSION: v0.3.0
+
+      - run:
+          name: Wait for kafka
+          command: dockerize -wait tcp://kafka:9092 -timeout 1m
 
 
       - run:

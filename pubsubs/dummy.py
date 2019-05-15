@@ -14,10 +14,11 @@ class DummyClient(MessageQueue):
 
     BACKENDS = ["dummy"]
     backend = "dummy"
+    _subscriber_config = {"dummy": "subscriber"}
 
     @override
     def _connect(self):
-        self._subscriber_config = {"dummy": "subscriber"}
+        pass
 
     @override
     def _publish(self, topic, message):

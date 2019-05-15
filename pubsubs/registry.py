@@ -17,9 +17,7 @@ class Registry:
         )
 
     def register(self, message_queue, name):
-        """ Assign concrete concrete instance to a name."""
-        name = message_queue.name if not name else name
-
+        """ Assign concrete instance to a name."""
         if name in self._registry:
             raise PubSubKeyError(f"PubSub {name} exists.")
 
