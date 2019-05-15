@@ -20,6 +20,10 @@ setup(
     author_email=about["__author_email__"],
     url="https://github.com/revolut-engineering/pubsubs",
     install_requires=about["__dependencies__"],
+    extras_require={
+        "kafka": ["confluent_kafka"],
+        "dev": ["flake8", "pytest", "black"]
+    },
     packages=find_packages(include=["pubsubs"]),
     python_requires=">=3.6",
 )

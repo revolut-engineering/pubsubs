@@ -16,7 +16,7 @@ __version__ = "0.0.1"
 __description__ = "Publish/Subscribe interface"
 
 __title__ = "pubsubs"
-__dependencies__ = ["interface_meta>=1.1.0"]
+__dependencies__ = ["interface_meta>=1.1.0", "pyyaml"]
 __optional_dependencies__ = {
     # Kafka client
     "kafka": ["confluent-kafka>=1.0.0"]

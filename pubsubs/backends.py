@@ -7,3 +7,4 @@ must be imported in this file.
 
 # from .avro import AvroClient
 from .kafka import KafkaClient, KafkaSubscriber
+from .dummy import DummyClient, DummySubscriber

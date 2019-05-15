@@ -58,6 +58,7 @@ config = {
         "auto.offset.reset": "earliest"
     },
 }
+
 registry = Registry()
 kafka = registry.new(name="myKafka", backend="kafka", **config)
 
@@ -65,6 +66,12 @@ subscriber = kafka.subscribe("mytopic")
 while True:
     message = subscriber.listen()
     print(message)
+```
+
+### Testing
+
+```
+make test
 ```
 
 ### Configuration
